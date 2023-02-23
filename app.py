@@ -1,3 +1,4 @@
+#coding = utf-8
 from flask import Flask, render_template, request,jsonify
 from flask_cors import CORS,cross_origin
 import requests
@@ -30,18 +31,22 @@ def index():
             prodRes = requests.get(productLink)
             prodRes.encoding='utf-8'
             prod_html = bs(prodRes.text, "html.parser")
-            print(prod_html)
+            #print(prod_html)
             commentboxes = prod_html.find_all('div', {'class': "_16PBlm"})
 
             filename = searchString + ".csv"
-            fw = open(filename, "w")
+            # fw = open(filename, "w")
             headers = "Product, Customer Name, Rating, Heading, Comment \n"
-            fw.write(headers)
+            # fw.write(headers)
+            with open(filename,'w', encoding="utf-8") as fw:
+                fw.write(headers)
+
             reviews = []
             for commentbox in commentboxes:
                 try:
                     #name.encode(encoding='utf-8')
                     name = commentbox.div.div.find_all('p', {'class': '_2sc7ZR _2V5EHH'})[0].text
+                    #name = name.encode(encoding='utf-8')
 
                 except:
                     logging.info("name")
@@ -49,6 +54,7 @@ def index():
                 try:
                     #rating.encode(encoding='utf-8')
                     rating = commentbox.div.div.div.div.text
+                    #rating = rating.encode(encoding='utf-8')
 
 
                 except:
@@ -58,6 +64,7 @@ def index():
                 try:
                     #commentHead.encode(encoding='utf-8')
                     commentHead = commentbox.div.div.div.p.text
+                    #commentHead = commentHead.encode(encoding='utf-8')
 
                 except:
                     commentHead = 'No Comment Heading'
@@ -66,6 +73,7 @@ def index():
                     comtag = commentbox.div.div.find_all('div', {'class': ''})
                     #custComment.encode(encoding='utf-8')
                     custComment = comtag[0].div.text
+                    #custComment =  custComment.encode(encoding='utf-8')
                 except Exception as e:
                     logging.info(e)
 
@@ -75,10 +83,10 @@ def index():
             logging.info("log my final result {}".format(reviews))
 
             
-            client = pymongo.MongoClient("mongodb+srv://pwskills:pwskills@cluster0.ln0bt5m.mongodb.net/?retryWrites=true&w=majority")
-            db =client['scrapper_eng_pwskills']
-            coll_pw_eng = db['scraper_pwskills_eng']
-            coll_pw_eng.insert_many(reviews)
+            # client = pymongo.MongoClient("mongodb+srv://pwskills:pwskills@cluster0.ln0bt5m.mongodb.net/?retryWrites=true&w=majority")
+            # db =client['scrapper_eng_pwskills']
+            # coll_pw_eng = db['scraper_pwskills_eng']
+            # coll_pw_eng.insert_many(reviews)
 
             return render_template('result.html', reviews=reviews[0:(len(reviews)-1)])
         except Exception as e:
@@ -91,4 +99,4 @@ def index():
 
 
 if __name__=="__main__":
-    app.run(host="0.0.0.0")
+    app.run()
